@@ -2,24 +2,21 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-FROM postgres:15
-
-RUN apt-get update && apt-get install -y locales \
-    && sed -i '/ru_RU.UTF-8/s/^# //g' /etc/locale.gen \
-    && locale-gen
-
-# Установка системных зависимостей
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
     postgresql-client \
-    && rm -rf /var/lib/apt/lists/*
+    locales \
+ && sed -i '/ru_RU.UTF-8/s/^# //g' /etc/locale.gen \
+ && locale-gen \
+ && rm -rf /var/lib/apt/lists/*
 
-# Копирование зависимостей
+# Copy dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копирование приложения
+# Copy app
 COPY app/ ./app/
 
-# Запуск приложения
+# Run app
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

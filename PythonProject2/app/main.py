@@ -49,3 +49,25 @@ app.add_middleware(
 app.include_router(flights.router, prefix="/api/v1/flights", tags=["Полеты"])
 app.include_router(regions.router, prefix="/api/v1/regions", tags=["Регионы"])
 app.include_router(reports.router, prefix="/api/v1/reports", tags=["Отчеты"])
+
+# ДОПОЛНИТЕЛЬНО: Подключаем роутеры БЕЗ префикса /api/v1 для обратной совместимости
+app.include_router(flights.router, prefix="/flights", tags=["Полеты (legacy)"], include_in_schema=False)
+app.include_router(regions.router, prefix="/regions", tags=["Регионы (legacy)"], include_in_schema=False)
+app.include_router(reports.router, prefix="/reports", tags=["Отчеты (legacy)"], include_in_schema=False)
+
+# Корневой маршрут
+@app.get("/")
+async def root():
+    """Корневой маршрут"""
+    return {
+        "message": "Сервис анализа полетов БАС",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "api": "/api/v1"
+    }
+
+# Health check
+@app.get("/health")
+async def health():
+    """Проверка здоровья сервиса"""
+    return {"status": "healthy"}

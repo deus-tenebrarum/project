@@ -1,6 +1,12 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/v1';
+// Определяем API_URL
+// Используем пустой baseURL, чтобы работали legacy роуты (/flights/...)
+const API_URL = window.location.hostname === 'localhost' ? 
+                'http://localhost:8000' : 
+                '';
+
+console.log('API URL:', API_URL);
 
 const api = axios.create({
   baseURL: API_URL,
@@ -12,6 +18,11 @@ const api = axios.create({
 // Interceptor для добавления токена
 api.interceptors.request.use(
   (config) => {
+    // Для FormData не устанавливаем Content-Type, браузер сделает это сам
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+    
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
